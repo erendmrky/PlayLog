@@ -34,3 +34,6 @@ build/
 
 # Spring Boot config
 src/main/resources/application.properties
+
+# Postman
+.postman
