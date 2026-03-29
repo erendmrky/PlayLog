@@ -2,6 +2,7 @@ package com.buren.playlog.service;
 
 import com.buren.playlog.model.BaseEntity;
 import com.buren.playlog.repository.AbstractRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,5 +12,19 @@ public abstract class AbstractService<T extends BaseEntity, ID> {
 
     protected AbstractService(AbstractRepository<T, ID> abstractRepository) {
         this.abstractRepository = abstractRepository;
+    }
+
+    protected T get(ID id) {
+        return abstractRepository.findById(id)
+                .filter(t -> t.isActive())
+                .orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+    }
+
+    public void delete(ID id) {
+        T entity = abstractRepository.findById(id)
+                .filter(t -> t.isActive())
+                .orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+        entity.setActive(false);
+        abstractRepository.save(entity);
     }
 }
