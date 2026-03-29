@@ -4,11 +4,15 @@ import com.buren.playlog.dto.UserRequestDTO;
 import com.buren.playlog.dto.UserResponseDTO;
 import com.buren.playlog.model.User;
 import com.buren.playlog.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService extends AbstractService<User, Long>{
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository) {
         super(userRepository);
@@ -22,7 +26,7 @@ public class UserService extends AbstractService<User, Long>{
         User user = new User();
         user.setEmail(dto.email());
         user.setUsername(dto.username());
-        user.setPassword(BCrypt.hashpw(dto.password(), BCrypt.gensalt()));
+        user.setPassword(passwordEncoder.encode(dto.password()));
 
         return dtoFrom(abstractRepository.save(user));
     }

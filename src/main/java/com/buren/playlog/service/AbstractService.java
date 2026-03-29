@@ -17,13 +17,11 @@ public abstract class AbstractService<T extends BaseEntity, ID> {
     protected T get(ID id) {
         return abstractRepository.findById(id)
                 .filter(t -> t.isActive())
-                .orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+                .orElseThrow(() -> new EntityNotFoundException(getClass().getSimpleName() + " with id " + id + " not found or inactive"));
     }
 
     public void delete(ID id) {
-        T entity = abstractRepository.findById(id)
-                .filter(t -> t.isActive())
-                .orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+        T entity = get(id);
         entity.setActive(false);
         abstractRepository.save(entity);
     }

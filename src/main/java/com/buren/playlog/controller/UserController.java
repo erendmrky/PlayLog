@@ -5,6 +5,7 @@ import com.buren.playlog.dto.UserResponseDTO;
 import com.buren.playlog.model.User;
 import com.buren.playlog.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -32,7 +33,7 @@ public class UserController extends AbstractController<User, Long> {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> add(@RequestBody UserRequestDTO requestDTO) {
+    public ResponseEntity<Void> add(@Valid @RequestBody UserRequestDTO requestDTO) {
         UserResponseDTO responseDTO = userService.add(requestDTO);
 
         URI location = ServletUriComponentsBuilder
