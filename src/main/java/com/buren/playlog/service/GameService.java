@@ -1,7 +1,6 @@
 package com.buren.playlog.service;
 
 import com.buren.playlog.dto.GameRequestDTO;
-import com.buren.playlog.dto.GameResponseDTO;
 import com.buren.playlog.model.Game;
 import com.buren.playlog.repository.GameRepository;
 import org.springframework.stereotype.Service;
@@ -13,21 +12,14 @@ public class GameService extends AbstractService<Game, Long>{
         super(gameRepository);
     }
 
-    public GameResponseDTO add(GameRequestDTO gameRequestDTO){
+    public void add(GameRequestDTO gameRequestDTO){
         Game game = new Game();
         game.setTitle(gameRequestDTO.title());
         game.setGenre(gameRequestDTO.genre());
         game.setPlatform(gameRequestDTO.platform());
         game.setReleaseDate(gameRequestDTO.releaseDate());
 
-        return dtoFrom(abstractRepository.save(game));
+        abstractRepository.save(game);
     }
 
-    public GameResponseDTO getGame(Long id){
-        return dtoFrom(super.get(id));
-    }
-
-    private static GameResponseDTO dtoFrom(Game game){
-        return new GameResponseDTO(game.getId(), game.getTitle(), game.getGenre(), game.getPlatform(), game.getReleaseDate());
-    }
 }
