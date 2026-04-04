@@ -48,7 +48,9 @@ public class GameService extends AbstractService<Game, Long>{
 
     public GameResponseDTO getGame(Long id) {
         try {
-            return dtoFrom(gameRepository.findByRawgId(id).orElseThrow(() -> new EntityNotFoundException("Game not found")));
+            return dtoFrom(gameRepository.findByRawgId(id)
+                    .filter(Game::isActive)
+                    .orElseThrow(() -> new EntityNotFoundException("Game not found")));
         } catch (EntityNotFoundException _) {
             GameResponseDTO gameResponseDTO =  rawgClient.get()
                     .uri(uriBuilder -> uriBuilder
