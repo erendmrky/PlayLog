@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name="games")
@@ -19,16 +20,19 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class Game extends BaseEntity{
 
-    @Column(name="title",unique = true)
+    @Column(name="name",unique = true)
     @NotBlank
-    private String title;
+    private String name;
 
-    @NotBlank
-    private String genre;
+    @Column(length = 10000)
+    private String description;
 
-    @NotBlank
-    private String platform;
+    @Column(name = "released", columnDefinition = "DATE")
+    private LocalDate released;
 
-    @Column(name = "release_date", columnDefinition = "DATE")
-    private LocalDate releaseDate;
+    private String backgroundImage;
+    private List<String> platforms;
+    private List<String> genre;
+
+    private Long rawgId;
 }

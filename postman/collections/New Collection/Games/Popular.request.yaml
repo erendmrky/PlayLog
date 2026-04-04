@@ -1,0 +1,5 @@
+$kind: http-request
+name: Popular
+url: http://localhost:8080/api/v1/games/popular
+method: GET
+order: 1775301678291

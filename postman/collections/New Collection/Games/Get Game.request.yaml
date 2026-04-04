@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Game
+url: http://localhost:8080/api/v1/games/3498
+method: GET
+order: 4503319383265817
