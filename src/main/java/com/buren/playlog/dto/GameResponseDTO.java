@@ -24,9 +24,9 @@ public class GameResponseDTO {
     @JsonProperty("background_image")
     private String backgroundImage;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<String> platforms;
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<String> genres;
 
     @JsonProperty("platforms")

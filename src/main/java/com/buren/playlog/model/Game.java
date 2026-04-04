@@ -1,7 +1,11 @@
 package com.buren.playlog.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -20,7 +24,6 @@ import java.util.List;
 @NoArgsConstructor
 public class Game extends BaseEntity{
 
-    @Column(name="name",unique = true)
     @NotBlank
     private String name;
 
@@ -31,8 +34,17 @@ public class Game extends BaseEntity{
     private LocalDate released;
 
     private String backgroundImage;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "game_platforms", joinColumns = @JoinColumn(name = "game_id"))
+    @Column(name = "platform")
     private List<String> platforms;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "game_genres", joinColumns = @JoinColumn(name = "game_id"))
+    @Column(name = "genre")
     private List<String> genre;
 
+    @Column(unique = true)
     private Long rawgId;
 }
