@@ -1,0 +1,18 @@
+$kind: http-request
+name: Update Review
+url: http://localhost:8080/api/v1/reviews/1
+method: PUT
+body:
+  type: json
+  content: "{\r
+
+    \    \"rating\": 1,\r
+
+    \    \"comment\": \"Boring\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInN1YiI6ImZ1bmJ1cmFrIiwiaWF0IjoxNzc1Mzg2NzczLCJleHAiOjE3NzUzOTAzNzN9.Y7YF6FDVIt2jhmF7dV6N54MsAnLoFex0lPwayjVsaPU
+order: 2785046539716979

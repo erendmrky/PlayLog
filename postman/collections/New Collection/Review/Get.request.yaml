@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get
+url: http://localhost:8080/api/v1/reviews/1
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInN1YiI6ImZ1bmJ1cmFrIiwiaWF0IjoxNzc1Mzg2NTQwLCJleHAiOjE3NzUzOTAxNDB9.zdNUxpEr44cOCdK6KidWdZaF3icM7jL_sfXztih2JYk
+order: 1775386559837

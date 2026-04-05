@@ -1,0 +1,20 @@
+$kind: http-request
+name: Create Review
+url: http://localhost:8080/api/v1/reviews
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"rating\": 5,\r
+
+    \    \"comment\": \"Good\",\r
+
+    \    \"gameId\": 3498\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInN1YiI6ImJ1cmFrIiwiaWF0IjoxNzc1Mzg4ODk4LCJleHAiOjE3NzUzOTI0OTh9.plSF-cRyqzGb_4qv5DVnR5t0W9I1YZJstPrn-ohITDI
+order: 1578315508099117

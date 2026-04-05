@@ -1,44 +1,104 @@
 package com.buren.playlog.service;
 
-import com.buren.playlog.dto.ReviewRequestDTO;
-import com.buren.playlog.dto.ReviewResponseDTO;
-import com.buren.playlog.dto.UserResponseDTO;
+import com.buren.playlog.dto.*;
+import com.buren.playlog.exceptions.RawgException;
+import com.buren.playlog.model.BaseEntity;
+import com.buren.playlog.model.Game;
 import com.buren.playlog.model.Review;
+import com.buren.playlog.model.User;
 import com.buren.playlog.repository.GameRepository;
 import com.buren.playlog.repository.ReviewRepository;
-import com.buren.playlog.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
 
 @Service
 public class ReviewService extends AbstractService<Review, Long>{
 
-    private final UserRepository userRepository;
-    private final GameRepository gameRepository;
+    @Value("${rawg.apikey}")
+    private String rawgApiKey;
 
-    public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository,GameRepository gameRepository) {
+    private final RestClient rawgClient;
+    private final GameRepository gameRepository;
+    private final ReviewRepository reviewRepository;
+
+    public ReviewService(ReviewRepository reviewRepository, GameRepository gameRepository, RestClient rawgClient) {
         super(reviewRepository);
-        this.userRepository = userRepository;
+        this.reviewRepository = reviewRepository;
         this.gameRepository = gameRepository;
+        this.rawgClient = rawgClient;
     }
 
-    public ReviewResponseDTO add(ReviewRequestDTO reviewRequestDTO){
-
+    @Transactional
+    public ReviewResponseDTO add(ReviewRequestDTO reviewRequestDTO, User currentUser){
+        if (reviewRepository.findByUserIdAndGameId(currentUser.getId(), reviewRequestDTO.gameId()).isPresent()) {
+            throw new IllegalArgumentException("You have already reviewed this game.");
+        }
         Review review = new Review();
         review.setRating(reviewRequestDTO.rating());
         review.setComment(reviewRequestDTO.comment());
         review.setCreatedDate(LocalDate.now());
-        review.setUser(userRepository.findById(reviewRequestDTO.userId())
-                .filter(f -> f.isActive())
-                .orElseThrow(() -> new EntityNotFoundException(getClass().getSimpleName() + " with id " + reviewRequestDTO.userId() + " not found or inactive")));
-        review.setGame(gameRepository.findById(reviewRequestDTO.gameId())
-                .filter(f -> f.isActive())
-                .orElseThrow(() -> new EntityNotFoundException(getClass().getSimpleName() + " with id " + reviewRequestDTO.gameId() + " not found or inactive")));
+        review.setUser(currentUser);
+        Game game = null;
 
+        try {
+              game = gameRepository.findByRawgId(reviewRequestDTO.gameId())
+                    .filter(BaseEntity::isActive)
+                    .orElseThrow(() -> new EntityNotFoundException("Game with id " + reviewRequestDTO.gameId() + " not found or inactive"));
+        } catch (EntityNotFoundException _) {
+            GameResponseDTO gameResponseDTO =  rawgClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("games/{id}")
+                            .queryParam("key", rawgApiKey)
+                            .build(reviewRequestDTO.gameId()))
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, ((req, res) -> {
+                        throw new RawgException("No game found or RAW API Error " + res.getStatusCode());
+                    }))
+                    .body(GameResponseDTO.class);
 
+            if (gameResponseDTO != null) {
+                game =  gameRepository.save(GameService.fromDTO(gameResponseDTO));
+            }
+        }
+        if (game == null) {
+            throw new EntityNotFoundException("Game with id " + reviewRequestDTO.gameId() + " not found");
+        }
+        review.setGame(game);
         return dtoFrom(abstractRepository.save(review));
+    }
+
+    @Transactional
+    public ReviewResponseDTO update(Long id, ReviewUpdateDTO reviewUpdateDTO, User currentUser){
+        Review review = super.get(id);
+        if (!review.getUser().getId().equals(currentUser.getId())) {
+            throw new SecurityException("You can only update your own reviews.");
+        }
+        review.setComment(reviewUpdateDTO.comment());
+        review.setRating(reviewUpdateDTO.rating());
+        return dtoFrom(abstractRepository.save(review));
+    }
+
+    @Override
+    public void delete(Long id) {
+        Review review = super.get(id);
+
+        User currentUser = (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (currentUser != null) {
+            if (!review.getUser().getId().equals(currentUser.getId())) {
+                throw new SecurityException("You can only delete your own reviews.");
+            }
+            super.delete(id);
+        }
     }
 
     public ReviewResponseDTO getReview(Long id){

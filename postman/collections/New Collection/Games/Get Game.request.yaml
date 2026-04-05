@@ -2,4 +2,8 @@ $kind: http-request
 name: Get Game
 url: http://localhost:8080/api/v1/games/3498
 method: GET
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInN1YiI6ImZ1bmJ1cmFrIiwiaWF0IjoxNzc1Mzg4MDA1LCJleHAiOjE3NzUzOTE2MDV9.s2mtcmUmL5CHpWLPGk_ZWv68OcjxO-AX5Ym-ZkEpNRQ
 order: 4503319383265817
