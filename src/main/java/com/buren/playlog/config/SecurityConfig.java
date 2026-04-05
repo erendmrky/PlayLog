@@ -27,7 +27,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,@Value("${api.root}") String root) {
-        final String[] ALLOWED_PATHS = {root+"/auth/login",root+"/auth/register"};
+        final String[] ALLOWED_PATHS = {root+"/auth/login",root+"/auth/register", "/swagger-ui/index.html","/v3/api-docs/**","/swagger-ui/**"};
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(ALLOWED_PATHS).permitAll()
