@@ -1,0 +1,9 @@
+$kind: http-request
+name: Delete Review
+url: http://localhost:8080/api/v1/reviews/1
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMsInN1YiI6ImZ1bmJ1cmFrIiwiaWF0IjoxNzc1Mzg4OTI5LCJleHAiOjE3NzUzOTI1Mjl9.8kL6J0ixT6Mhwr3j3fD50H7RK228XIbB3hUAXXWccGo
+order: 3115389429632523

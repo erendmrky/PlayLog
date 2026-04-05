@@ -1,16 +1,14 @@
 $kind: http-request
-name: Add User
-url: http://localhost:8080/api/v1/users
+name: Login
+url: http://localhost:8080/api/v1/auth/login
 method: POST
 body:
   type: json
   content: "{\r
-
-    \    \"email\": \"buraqdmrky@gmail.com\",\r
 
     \    \"username\": \"funburak\",\r
 
     \    \"password\": \"12345\"\r
 
     }"
-order: 1774785785531
+order: 4388987551311541
