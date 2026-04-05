@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -59,7 +60,7 @@ public class ReviewService extends AbstractService<Review, Long>{
                             .build(reviewRequestDTO.gameId()))
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError, ((req, res) -> {
-                        throw new RawgException("No game found or RAW API Error " + res.getStatusCode());
+                        throw new RawgException("No game found or RAWG API Error " + res.getStatusCode());
                     }))
                     .body(GameResponseDTO.class);
 
@@ -89,16 +90,20 @@ public class ReviewService extends AbstractService<Review, Long>{
     public void delete(Long id) {
         Review review = super.get(id);
 
-        User currentUser = (User) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("You must be logged in to delete a review.");
+        }
+
+        User currentUser = (User) authentication.getPrincipal();
         if (currentUser != null) {
             if (!review.getUser().getId().equals(currentUser.getId())) {
                 throw new SecurityException("You can only delete your own reviews.");
             }
             super.delete(id);
         }
+        throw new SecurityException("You must be logged in to delete a review.");
     }
 
     public ReviewResponseDTO getReview(Long id){
