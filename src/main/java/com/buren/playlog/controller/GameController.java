@@ -28,8 +28,7 @@ public class GameController extends AbstractController<Game, Long> {
     @Operation(summary = "Get popular games")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "Games returns successfully"),
-            @ApiResponse(responseCode = "403",description = "Unauthorized action."),
-            @ApiResponse(responseCode = "404",description = "Games not found.")
+            @ApiResponse(responseCode = "403",description = "Unauthorized action.")
     })
     @GetMapping("/popular")
     public ResponseEntity<?> getPopular() {
@@ -39,8 +38,7 @@ public class GameController extends AbstractController<Game, Long> {
     @Operation(summary = "Gets the specific game")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "Game returns successfully"),
-            @ApiResponse(responseCode = "403",description = "Unauthorized action."),
-            @ApiResponse(responseCode = "404",description = "Game not found.")
+            @ApiResponse(responseCode = "403",description = "Unauthorized action.")
 
     })
     @GetMapping("/{id}")

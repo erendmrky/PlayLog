@@ -32,8 +32,7 @@ public class ReviewController extends AbstractController<Review, Long>{
     @Operation(summary = "Adds review to game")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",description = "Review added successfully."),
-            @ApiResponse(responseCode = "403",description = "Unauthorized action."),
-            @ApiResponse(responseCode = "404",description = "User or game not found.")
+            @ApiResponse(responseCode = "403",description = "Unauthorized action.")
     })
     @PostMapping
     public ResponseEntity<Void> add(@Valid @RequestBody ReviewRequestDTO reviewRequestDTO){
