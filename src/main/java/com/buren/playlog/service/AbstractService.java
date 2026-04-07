@@ -1,8 +1,8 @@
 package com.buren.playlog.service;
 
+import com.buren.playlog.exceptions.EntityNotFoundException_;
 import com.buren.playlog.model.BaseEntity;
 import com.buren.playlog.repository.AbstractRepository;
-import jakarta.persistence.EntityNotFoundException;
 
 public abstract class AbstractService<T extends BaseEntity, ID> {
 
@@ -15,7 +15,7 @@ public abstract class AbstractService<T extends BaseEntity, ID> {
     protected T get(ID id) {
         return abstractRepository.findById(id)
                 .filter(t -> t.isActive())
-                .orElseThrow(() -> new EntityNotFoundException(getClass().getSimpleName() + " with id " + id + " not found or inactive"));
+                .orElseThrow(() -> new EntityNotFoundException_(getClass().getSimpleName() + " with id " + id + " not found or inactive"));
     }
 
     public void delete(ID id) {
