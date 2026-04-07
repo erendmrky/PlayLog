@@ -2,9 +2,9 @@ package com.buren.playlog.service;
 
 import com.buren.playlog.dto.UserRequestDTO;
 import com.buren.playlog.dto.UserResponseDTO;
-import com.buren.playlog.exceptions.UserAlreadyExistsException;
 import com.buren.playlog.model.User;
 import com.buren.playlog.repository.UserRepository;
+import jakarta.persistence.EntityExistsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,7 @@ public class UserService extends AbstractService<User, Long> {
 
     public UserResponseDTO add(UserRequestDTO dto) {
         if(userRepository.findByUsername(dto.username()).isPresent()){
-            throw new UserAlreadyExistsException("User already exists");
+            throw new EntityExistsException("User already exists");
         }
         User user = new User();
         user.setEmail(dto.email());

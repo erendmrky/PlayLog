@@ -1,12 +1,22 @@
 package com.buren.playlog.dto;
 
-import org.springframework.http.HttpStatus;
-
 import java.time.LocalDate;
 
 public record ErrorResponseDTO(
-        String message,
-        LocalDate date,
-        HttpStatus status
+        ErrorCode error,
+        LocalDate date
 ) {
+    public record ErrorCode(
+            ErrorCodeEnum code,
+            String message
+    ) {}
+
+    public enum ErrorCodeEnum {
+        PASSWORD_WRONG,
+        ENTITY_EXISTS,
+        RAWG,
+        ENTITY_NOT_FOUND,
+        TOKEN_INVALID,
+        BAD_REQUEST
+    }
 }
