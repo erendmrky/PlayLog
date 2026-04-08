@@ -15,7 +15,7 @@ public abstract class AbstractService<T extends BaseEntity, ID> {
     protected T get(ID id) {
         return abstractRepository.findById(id)
                 .filter(t -> t.isActive())
-                .orElseThrow(() -> new EntityNotFoundException(getClass().getSimpleName() + " with id " + id + " not found or inactive"));
+                .orElseThrow(() -> new EntityNotFoundException("Entity with id " + id + " not found or inactive"));
     }
 
     public void delete(ID id) {

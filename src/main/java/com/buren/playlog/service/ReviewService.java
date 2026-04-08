@@ -8,6 +8,7 @@ import com.buren.playlog.model.Review;
 import com.buren.playlog.model.User;
 import com.buren.playlog.repository.GameRepository;
 import com.buren.playlog.repository.ReviewRepository;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +40,7 @@ public class ReviewService extends AbstractService<Review, Long>{
     @Transactional
     public ReviewResponseDTO add(ReviewRequestDTO reviewRequestDTO, User currentUser){
         if (reviewRepository.findByUserIdAndGameId(currentUser.getId(), reviewRequestDTO.gameId()).isPresent()) {
-            throw new IllegalArgumentException("You have already reviewed this game.");
+            throw new EntityExistsException("You have already reviewed this game.");
         }
         Review review = new Review();
         review.setRating(reviewRequestDTO.rating());
