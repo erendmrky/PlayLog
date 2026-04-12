@@ -1,0 +1,7 @@
+$kind: http-request
+name: GetAll
+url: http://localhost:8080/api/v1/reviews
+method: GET
+auth:
+  type: noauth
+order: 3154637454454311
