@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,8 +39,8 @@ public class ReviewController extends AbstractController<Review, Long>{
             @ApiResponse(responseCode = "200",description = "Reviews retrieved successfully.")
     })
     @GetMapping
-    public ResponseEntity<Page<ReviewResponseDTO>> getAll(@RequestParam(name = "page", defaultValue = "0") int page,
-                                                          @RequestParam(name = "size", defaultValue = "10") int size){
+    public ResponseEntity<Page<ReviewResponseDTO>> getAll(@PositiveOrZero @RequestParam(name = "page", defaultValue = "0") int page,
+                                                          @Positive @RequestParam(name = "size", defaultValue = "10") int size){
         return ResponseEntity.ok(reviewService.getAll(page, size));
     }
 

@@ -13,7 +13,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,8 +42,9 @@ public class ReviewService extends AbstractService<Review, Long>{
     }
 
     public Page<ReviewResponseDTO> getAll(int page, int size){
-        Pageable pageable = Pageable.ofSize(size).withPage(page);
-        return abstractRepository.findAll(pageable).map(ReviewService::dtoFrom);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        return reviewRepository.findAllActive(pageable)
+                .map(ReviewService::dtoFrom);
     }
 
     @Transactional
