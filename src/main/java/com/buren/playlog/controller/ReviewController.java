@@ -68,7 +68,7 @@ public class ReviewController extends AbstractController<Review, Long>{
 
     @Operation(summary = "Gets the review")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201",description = "Review get successfully."),
+            @ApiResponse(responseCode = "200",description = "Review get successfully."),
             @ApiResponse(responseCode = "403",description = "Unauthorized action."),
             @ApiResponse(responseCode = "404",description = "Review not found.")
     })
