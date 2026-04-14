@@ -1,12 +1,14 @@
 package com.buren.playlog;
 
 import com.buren.playlog.dto.*;
+import com.buren.playlog.repository.GameRepository;
 import com.buren.playlog.repository.ReviewRepository;
 import com.buren.playlog.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -23,6 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class PlaylogApplicationTests {
 
+	@Value("${api.root}")
+	private String root;
+
 	@Autowired
 	private MockMvc mockMvc;
 
@@ -32,22 +37,21 @@ class PlaylogApplicationTests {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private GameRepository gameRepository;
+
 	private final ObjectMapper objectMapper = new ObjectMapper()
 			.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
-//    @Test
-//	void contextLoads() {
-//	}
-
-	public String RegisterLogin() throws Exception{
-		if(userRepository.findByUsername("funburak").isEmpty()){
-			UserRequestDTO register = new UserRequestDTO("buraqdmrky@gmail.com", "funburak", "12345");
-			mockMvc.perform(post("/api/v1/auth/register")
+	public String registerLogin() throws Exception{
+			UserRequestDTO register = new UserRequestDTO("sample@gmail.com", "sample", "12345");
+			mockMvc.perform(post(root+"/auth/register")
 					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(register)));
-		}
-		LoginRequestDTO login = new LoginRequestDTO("funburak","12345");
-		String token = mockMvc.perform(post("/api/v1/auth/login")
+					.content(objectMapper.writeValueAsString(register)))
+					.andExpect(status().isCreated())
+					.andReturn();
+		LoginRequestDTO login = new LoginRequestDTO("sample","12345");
+		String token = mockMvc.perform(post(root+"/auth/login")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(login)))
 				.andExpect(status().isOk())
@@ -57,9 +61,9 @@ class PlaylogApplicationTests {
 
 	@Test
 	void getUserTest() throws Exception {
-		String token = RegisterLogin();
-		Long id = userRepository.findByUsername("funburak").get().getId();
-		MvcResult result = mockMvc.perform(get("/api/v1/users/"+id)
+		String token = registerLogin();
+		Long id = userRepository.findByUsername("sample").get().getId();
+		MvcResult result = mockMvc.perform(get(root+"/users/"+id)
 				.header("Authorization","Bearer "+token)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -67,28 +71,30 @@ class PlaylogApplicationTests {
 
 		String responseBody = result.getResponse().getContentAsString();
 
-		assertEquals(userRepository.findByUsername("funburak").get().getUsername(),objectMapper.readTree(responseBody).get("username").asText());
-		assertEquals(userRepository.findByUsername("funburak").get().getEmail(),objectMapper.readTree(responseBody).get("email").asText());
+		assertEquals(userRepository.findByUsername("sample").get().getUsername(),objectMapper.readTree(responseBody).get("username").asText());
+		assertEquals(userRepository.findByUsername("sample").get().getEmail(),objectMapper.readTree(responseBody).get("email").asText());
 	}
 
 	@Test
 	void deleteUserTest() throws Exception {
-		String token = RegisterLogin();
-		Long id = userRepository.findByUsername("funburak").get().getId();
-		mockMvc.perform(delete("/api/v1/users/"+id)
-				.header("Authorization","Bearer "+token)
-				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent())
-				.andReturn();
+		String token = registerLogin();
+		if(userRepository.findByUsername("sample").isPresent()) {
+			Long id = userRepository.findByUsername("sample").get().getId();
+			mockMvc.perform(delete(root + "/users/" + id)
+							.header("Authorization", "Bearer " + token)
+							.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isNoContent())
+					.andReturn();
 
-		assertFalse(userRepository.findById(id).get().isActive());
+			assertFalse(userRepository.findById(id).get().isActive());
+		}
 	}
 
 	@Test
 	void postReviewTest() throws Exception {
-		ReviewRequestDTO reviewRequestDTO = new ReviewRequestDTO(5,"Witcher 3 is the best game I have ever played. I recommend this game to everyone", 4L);
-		String token = RegisterLogin();
-		MvcResult result = mockMvc.perform(post("/api/v1/reviews")
+		ReviewRequestDTO reviewRequestDTO = new ReviewRequestDTO(5,"Witcher 3 is the best game I have ever played. I recommend this game to everyone", 3328L);
+		String token = registerLogin();
+		MvcResult result = mockMvc.perform(post(root+"/reviews")
 				.header("Authorization","Bearer "+token)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(reviewRequestDTO)))
@@ -101,14 +107,15 @@ class PlaylogApplicationTests {
 
 		assertEquals(reviewRequestDTO.rating(),reviewRepository.findById(Long.valueOf(createdId)).get().getRating());
 		assertEquals("Witcher 3 is the best game I have ever played. I recommend this game to everyone",reviewRepository.findById(Long.valueOf(createdId)).get().getComment());
+		assertEquals(reviewRequestDTO.gameId(),gameRepository.findById(Long.valueOf(createdId)).get().getRawgId());
 		assertNotNull(location);
 	}
 
 	@Test
 	void getAllReviewsTest() throws Exception{
-		String token = RegisterLogin();
-		ReviewRequestDTO reviewRequestDTO1 = new ReviewRequestDTO(5,"Witcher 3 is the best game I have ever played. I recommend this game to everyone", 1L);
-		mockMvc.perform(post("/api/v1/reviews")
+		String token = registerLogin();
+		ReviewRequestDTO reviewRequestDTO1 = new ReviewRequestDTO(5,"Witcher 3 is the best game I have ever played. I recommend this game to everyone", 3328L);
+		MvcResult result1 = mockMvc.perform(post(root+"/reviews")
 						.header("Authorization","Bearer "+token)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(reviewRequestDTO1)))
@@ -116,8 +123,8 @@ class PlaylogApplicationTests {
 				.andExpect(header().exists("Location"))
 				.andReturn();
 
-		ReviewRequestDTO reviewRequestDTO2 = new ReviewRequestDTO(4,"Witcher 2 is decent but not the greatest", 2L);
-		mockMvc.perform(post("/api/v1/reviews")
+		ReviewRequestDTO reviewRequestDTO2 = new ReviewRequestDTO(4,"GTA 5 is really good game.", 3498L);
+		MvcResult result2 = mockMvc.perform(post(root+"/reviews")
 						.header("Authorization","Bearer "+token)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(reviewRequestDTO2)))
@@ -125,19 +132,29 @@ class PlaylogApplicationTests {
 				.andExpect(header().exists("Location"))
 				.andReturn();
 
-		MvcResult result = mockMvc.perform(get("/api/v1/reviews")
+		MvcResult result = mockMvc.perform(get(root+"/reviews")
 				.header("Authorization","Bearer "+token)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andReturn();
+
+		String location1 = result1.getResponse().getHeader("Location");
+		String createdId1 = location1.substring(location1.lastIndexOf("/") + 1);
+
+		String location2 = result2.getResponse().getHeader("Location");
+		String createdId2 = location2.substring(location2.lastIndexOf("/") + 1);
+
+
 		assertNotNull(result.getResponse().getContentAsString());
+		assertEquals(reviewRequestDTO1.gameId(),gameRepository.findById(Long.valueOf(createdId1)).get().getRawgId());
+		assertEquals(reviewRequestDTO2.gameId(),gameRepository.findById(Long.valueOf(createdId2)).get().getRawgId());
 	}
 
 	@Test
 	void getSpecificReviewTest() throws Exception{
-		String token = RegisterLogin();
-		ReviewRequestDTO reviewRequestDTO = new ReviewRequestDTO(5,"Witcher 3 is the best game I have ever played. I recommend this game to everyone", 1L);
-		MvcResult locationid = mockMvc.perform(post("/api/v1/reviews")
+		String token = registerLogin();
+		ReviewRequestDTO reviewRequestDTO = new ReviewRequestDTO(5,"Witcher 3 is the best game I have ever played. I recommend this game to everyone", 3328L);
+		MvcResult locationid = mockMvc.perform(post(root+"/reviews")
 						.header("Authorization","Bearer "+token)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(reviewRequestDTO)))
@@ -148,7 +165,7 @@ class PlaylogApplicationTests {
 		String location = locationid.getResponse().getHeader("Location");
 		String createdId = location.substring(location.lastIndexOf("/") + 1);
 
-		MvcResult result = mockMvc.perform(get("/api/v1/reviews/"+createdId)
+		MvcResult result = mockMvc.perform(get(root+"/reviews/"+createdId)
 				.header("Authorization","Bearer "+token)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -163,9 +180,9 @@ class PlaylogApplicationTests {
 
 	@Test
 	void updateReviewTest() throws Exception{
-		String token = RegisterLogin();
-		ReviewRequestDTO reviewRequestDTO = new ReviewRequestDTO(5,"Witcher 3 is the best game I have ever played. I recommend this game to everyone", 1L);
-		MvcResult locationid = mockMvc.perform(post("/api/v1/reviews")
+		String token = registerLogin();
+		ReviewRequestDTO reviewRequestDTO = new ReviewRequestDTO(5,"Witcher 3 is the best game I have ever played. I recommend this game to everyone", 3328L);
+		MvcResult locationId = mockMvc.perform(post(root+"/reviews")
 						.header("Authorization","Bearer "+token)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(reviewRequestDTO)))
@@ -173,13 +190,13 @@ class PlaylogApplicationTests {
 				.andExpect(header().exists("Location"))
 				.andReturn();
 
-		String location = locationid.getResponse().getHeader("Location");
+		String location = locationId.getResponse().getHeader("Location");
 		String createdId = location.substring(location.lastIndexOf("/") + 1);
 
 		ReviewUpdateDTO reviewUpdateDTO = new ReviewUpdateDTO(1,"New comment");
 		String oldComment = reviewRepository.findById(Long.valueOf(createdId)).get().getComment();
 		Integer oldRating = reviewRepository.findById(Long.valueOf(createdId)).get().getRating();
-		MvcResult result = mockMvc.perform(put("/api/v1/reviews/"+createdId)
+		MvcResult result = mockMvc.perform(put(root+"/reviews/"+createdId)
 				.header("Authorization","Bearer "+token)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(reviewUpdateDTO)))
@@ -194,8 +211,8 @@ class PlaylogApplicationTests {
 
 	@Test
 	void getPopularGameTest() throws Exception {
-		String token = RegisterLogin();
-		MvcResult result = mockMvc.perform(get("/api/v1/games/popular")
+		String token = registerLogin();
+		MvcResult result = mockMvc.perform(get(root+"/games/popular")
 				.header("Authorization","Bearer "+token)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -206,8 +223,9 @@ class PlaylogApplicationTests {
 
 	@Test
 	void getSpecificGameTest() throws Exception {
-		String token = RegisterLogin();
-		MvcResult result = mockMvc.perform(get("/api/v1/games/1")
+		String token = registerLogin();
+		Long targetRawgId = 3328L;
+		MvcResult result = mockMvc.perform(get(root+"/games/"+targetRawgId)
 				.header("Authorization","Bearer "+token)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -217,6 +235,7 @@ class PlaylogApplicationTests {
 		String gameName = objectMapper.readTree(responseBody).get("name").asText();
 
 		assertNotNull(gameName);
+		assertEquals(targetRawgId,gameRepository.findByRawgId(targetRawgId).get().getRawgId());
 	}
 
 }
