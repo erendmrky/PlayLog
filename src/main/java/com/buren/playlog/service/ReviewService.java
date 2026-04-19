@@ -1,6 +1,5 @@
 package com.buren.playlog.service;
 
-import ch.qos.logback.classic.Logger;
 import com.buren.playlog.dto.*;
 import com.buren.playlog.exceptions.RawgException;
 import com.buren.playlog.model.BaseEntity;
@@ -12,6 +11,7 @@ import com.buren.playlog.repository.ReviewRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -35,7 +35,7 @@ public class ReviewService extends AbstractService<Review, Long>{
     private final RestClient rawgClient;
     private final GameRepository gameRepository;
     private final ReviewRepository reviewRepository;
-    private final Logger logger = ((Logger) LoggerFactory.getLogger("REVIEW_SERVICE"));
+    private final Logger logger = LoggerFactory.getLogger("REVIEW_SERVICE");
 
     public ReviewService(ReviewRepository reviewRepository, GameRepository gameRepository, RestClient rawgClient) {
         super(reviewRepository);

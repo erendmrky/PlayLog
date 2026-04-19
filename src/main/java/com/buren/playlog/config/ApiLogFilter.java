@@ -1,10 +1,10 @@
 package com.buren.playlog.config;
 
-import ch.qos.logback.classic.Logger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,7 +17,7 @@ import java.io.IOException;
 @Component
 public class ApiLogFilter extends OncePerRequestFilter {
 
-    private final Logger logger = ((Logger) LoggerFactory.getLogger("API"));
+    private final Logger logger = LoggerFactory.getLogger("API");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -33,13 +33,12 @@ public class ApiLogFilter extends OncePerRequestFilter {
                     ? authentication.getName()
                     : "anonymous";
 
-            logger.info("[{}] {} {} - Status: {} | Duration: {}ms | IP: {} | User: {}",
+            logger.info("[{}] {} - Status: {} | Duration: {}ms | IP: {} | User: {}",
                     request.getMethod(),
                     request.getRequestURI(),
-                    request.getQueryString() != null ? "?" + request.getQueryString() : "",
                     response.getStatus(),
                     duration,
-                    request.getRemoteHost(),
+                    request.getRemoteAddr(),
                     requester
             );
         }

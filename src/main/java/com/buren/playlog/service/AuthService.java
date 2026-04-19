@@ -1,12 +1,12 @@
 package com.buren.playlog.service;
 
-import ch.qos.logback.classic.Logger;
 import com.buren.playlog.dto.LoginRequestDTO;
 import com.buren.playlog.dto.TokenResponseDTO;
 import com.buren.playlog.exceptions.PasswordException;
 import com.buren.playlog.model.User;
 import com.buren.playlog.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    private final Logger logger = (Logger) LoggerFactory.getLogger("AUTHENTICATION_SERVICE");
+    private final Logger logger = LoggerFactory.getLogger("AUTHENTICATION_SERVICE");
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
