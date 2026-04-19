@@ -1,11 +1,13 @@
 package com.buren.playlog.service;
 
+import ch.qos.logback.classic.Logger;
 import com.buren.playlog.dto.LoginRequestDTO;
 import com.buren.playlog.dto.TokenResponseDTO;
 import com.buren.playlog.exceptions.PasswordException;
 import com.buren.playlog.model.User;
 import com.buren.playlog.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+
+    private final Logger logger = (Logger) LoggerFactory.getLogger("AUTHENTICATION_SERVICE");
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
@@ -26,6 +30,7 @@ public class AuthService {
         User user = userRepository.findByUsername(loginDTO.username())
                 .orElseThrow(() -> new EntityNotFoundException(getClass().getSimpleName() + " with name " + loginDTO.username() + " not found or inactive"));
         if(passwordEncoder.matches(loginDTO.password(), user.getPassword())){
+            logger.info("User {} logged in successfully", user.getUsername());
             return new TokenResponseDTO(jwtService.generateToken(user.getId(), user.getUsername()));
         }
         throw new PasswordException("Password is incorrect");

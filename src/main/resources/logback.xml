@@ -1,0 +1,72 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="AUTHENTICATION_SERVICE_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>logs/authentication-service.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="GAME_SERVICE_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>logs/game-service.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="REVIEW_SERVICE_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>logs/review-service.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="API_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>logs/api.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="EXCEPTIONS_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>logs/exceptions.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <logger name="AUTHENTICATION_SERVICE" level="INFO" additivity="false">
+        <appender-ref ref="AUTHENTICATION_SERVICE_LOG" />
+    </logger>
+
+    <logger name="GAME_SERVICE" level="INFO" additivity="false">
+        <appender-ref ref="GAME_SERVICE_LOG" />
+    </logger>
+
+    <logger name="REVIEW_SERVICE" level="INFO" additivity="false">
+        <appender-ref ref="REVIEW_SERVICE_LOG" />
+    </logger>
+
+    <logger name="API" level="INFO" additivity="false">
+        <appender-ref ref="API_LOG" />
+    </logger>
+
+    <logger name="EXCEPTIONS" level="ERROR" additivity="false">
+        <appender-ref ref="EXCEPTIONS_LOG" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

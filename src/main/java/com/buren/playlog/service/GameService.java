@@ -1,11 +1,13 @@
 package com.buren.playlog.service;
 
+import ch.qos.logback.classic.Logger;
 import com.buren.playlog.dto.GameResponseDTO;
 import com.buren.playlog.dto.RawgGameResponse;
 import com.buren.playlog.exceptions.RawgException;
 import com.buren.playlog.model.Game;
 import com.buren.playlog.repository.GameRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatusCode;
@@ -22,6 +24,7 @@ public class GameService extends AbstractService<Game, Long>{
 
     private final RestClient rawgClient;
     private final GameRepository gameRepository;
+    private final Logger logger = ((Logger) LoggerFactory.getLogger("GAME_SERVICE"));
 
     public GameService(GameRepository gameRepository, RestClient rawgClient) {
         super(gameRepository);
@@ -65,6 +68,7 @@ public class GameService extends AbstractService<Game, Long>{
 
             if (gameResponseDTO != null) {
                 abstractRepository.save(fromDTO(gameResponseDTO));
+                logger.info("Game with id {} not found in database, fetched from RAWG API and saved to database", id);
                 return gameResponseDTO;
             }
             return null;
