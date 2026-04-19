@@ -11,6 +11,8 @@ import com.buren.playlog.repository.ReviewRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +35,7 @@ public class ReviewService extends AbstractService<Review, Long>{
     private final RestClient rawgClient;
     private final GameRepository gameRepository;
     private final ReviewRepository reviewRepository;
+    private final Logger logger = LoggerFactory.getLogger("REVIEW_SERVICE");
 
     public ReviewService(ReviewRepository reviewRepository, GameRepository gameRepository, RestClient rawgClient) {
         super(reviewRepository);
@@ -63,6 +66,7 @@ public class ReviewService extends AbstractService<Review, Long>{
               game = gameRepository.findByRawgId(reviewRequestDTO.gameId())
                     .filter(BaseEntity::isActive)
                     .orElseThrow(() -> new EntityNotFoundException("Game with id " + reviewRequestDTO.gameId() + " not found or inactive"));
+              logger.info("Game with id {} found in database, adding review", reviewRequestDTO.gameId());
         } catch (EntityNotFoundException _) {
             GameResponseDTO gameResponseDTO =  rawgClient.get()
                     .uri(uriBuilder -> uriBuilder
@@ -77,12 +81,14 @@ public class ReviewService extends AbstractService<Review, Long>{
 
             if (gameResponseDTO != null) {
                 game =  gameRepository.save(GameService.fromDTO(gameResponseDTO));
+                logger.info("Game with id {} not found in database, fetched from RAWG API and saved to database, adding review", reviewRequestDTO.gameId());
             }
         }
         if (game == null) {
             throw new EntityNotFoundException("Game with id " + reviewRequestDTO.gameId() + " not found");
         }
         review.setGame(game);
+        logger.info("Adding review for game with id {} by user {}", reviewRequestDTO.gameId(), currentUser.getUsername());
         return dtoFrom(abstractRepository.save(review));
     }
 
@@ -94,6 +100,7 @@ public class ReviewService extends AbstractService<Review, Long>{
         }
         review.setComment(reviewUpdateDTO.comment());
         review.setRating(reviewUpdateDTO.rating());
+        logger.info("Updating review with id {} for game with id {} by user {}", id, review.getGame().getRawgId(), currentUser.getUsername());
         return dtoFrom(abstractRepository.save(review));
     }
 
@@ -112,6 +119,7 @@ public class ReviewService extends AbstractService<Review, Long>{
             if (!review.getUser().getId().equals(currentUser.getId())) {
                 throw new SecurityException("You can only delete your own reviews.");
             }
+            logger.info("Deleting review with id {} for game with id {} by user {}", id, review.getGame().getRawgId(), currentUser.getUsername());
             super.delete(id);
         }
         throw new SecurityException("You must be logged in to delete a review.");
