@@ -1,5 +1,6 @@
 package com.buren.playlog.service;
 
+import com.buren.playlog.repository.BlacklistTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -20,6 +21,11 @@ public class JwtService {
     @Value("${secret.key}")
     private String SECRET_KEY;
 
+    private final BlacklistTokenRepository blacklistTokenRepository;
+
+    public JwtService(BlacklistTokenRepository blacklistTokenRepository) {
+        this.blacklistTokenRepository = blacklistTokenRepository;
+    }
 
     public String generateToken(Long userID, String userName){
         return Jwts
@@ -34,15 +40,15 @@ public class JwtService {
     public Long extractUserId(String token){
         return extractClaim(token, claims -> {
             Object userId = claims.get("userId");
-            if (userId instanceof Number) {
-                return ((Number) userId).longValue();
+            if (userId instanceof Number number) {
+                return number.longValue();
             }
             return null;
         });
     }
 
     public String extractUserName(String token){
-        return (String)extractClaim(token, Claims::getSubject);
+        return extractClaim(token, Claims::getSubject);
     }
 
     public <T> T extractClaim(String token, Function<Claims,T> claimsResolver){
@@ -67,7 +73,7 @@ public class JwtService {
     public boolean isTokenValid(String token, UserDetails user){
         final String username = extractUserName(token);
         final Date expiredDate = extractClaim(token, Claims::getExpiration);
-        return username.equals(user.getUsername()) && isTokenExpired(expiredDate);
+        return username.equals(user.getUsername()) && isTokenExpired(expiredDate) && blacklistTokenRepository.findByToken(token).isEmpty();
     }
 
     private boolean isTokenExpired(Date expiredDate){

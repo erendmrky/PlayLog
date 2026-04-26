@@ -1,9 +1,6 @@
 package com.buren.playlog.controller;
 
-import com.buren.playlog.dto.LoginRequestDTO;
-import com.buren.playlog.dto.TokenResponseDTO;
-import com.buren.playlog.dto.UserRequestDTO;
-import com.buren.playlog.dto.UserResponseDTO;
+import com.buren.playlog.dto.*;
 import com.buren.playlog.service.AuthService;
 import com.buren.playlog.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,6 +57,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<TokenResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginDTO){
         return ResponseEntity.ok(authService.login(loginDTO));
+    }
+
+    @Operation(summary = "User logs out")
+    @ApiResponses(value = {@ApiResponse(responseCode = "204",description = "Successfully logged out.")})
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequestDTO dto){
+        authService.logout(dto.token());
+        return ResponseEntity.noContent().build();
     }
 }
 
