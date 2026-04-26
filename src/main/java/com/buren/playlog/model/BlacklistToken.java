@@ -16,6 +16,6 @@ import lombok.Setter;
 @Setter
 public class BlacklistToken extends BaseEntity{
 
-    @Column(name = "Blacklisted")
+    @Column(name = "blacklisted",unique = true)
     private String token;
 }

@@ -1,6 +1,7 @@
 package com.buren.playlog;
 
 import com.buren.playlog.dto.*;
+import com.buren.playlog.repository.BlacklistTokenRepository;
 import com.buren.playlog.repository.GameRepository;
 import com.buren.playlog.repository.ReviewRepository;
 import com.buren.playlog.repository.UserRepository;
@@ -39,6 +40,9 @@ class PlaylogApplicationTests {
 
 	@Autowired
 	private GameRepository gameRepository;
+
+	@Autowired
+	private BlacklistTokenRepository blacklistTokenRepository;
 
 	private final ObjectMapper objectMapper = new ObjectMapper()
 			.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
@@ -236,6 +240,20 @@ class PlaylogApplicationTests {
 
 		assertNotNull(gameName);
 		assertEquals(targetRawgId,gameRepository.findByRawgId(targetRawgId).get().getRawgId());
+	}
+
+	@Test
+	void logoutUserTest() throws Exception {
+		String token = registerLogin();
+		LogoutRequestDTO logoutRequestDTO = new LogoutRequestDTO(token);
+		mockMvc.perform(post(root+"/auth/logout")
+				.header("Authorization","Bearer "+token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(logoutRequestDTO)))
+				.andExpect(status().isNoContent())
+				.andReturn();
+
+		assertEquals(token,blacklistTokenRepository.findByToken(token).get().getToken());
 	}
 
 }

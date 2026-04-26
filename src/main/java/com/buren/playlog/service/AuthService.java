@@ -8,7 +8,6 @@ import com.buren.playlog.model.User;
 import com.buren.playlog.repository.BlacklistTokenRepository;
 import com.buren.playlog.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;

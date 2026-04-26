@@ -14,6 +14,6 @@ public interface BlacklistTokenRepository extends AbstractRepository<BlacklistTo
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM BlacklistToken b WHERE b.active = False")
+    @Query("DELETE FROM BlacklistToken b WHERE b.active = false")
     void deleteBlackListToken();
 }
