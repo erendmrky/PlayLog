@@ -49,5 +49,8 @@ public class AuthService {
             blacklistTokenRepository.save(blacklist);
             logger.info("User {} logged out successfully", username);
         }
+        else {
+            logger.warn("Logout attempt with an already blacklisted token for user: {}", username);
+        }
     }
 }
