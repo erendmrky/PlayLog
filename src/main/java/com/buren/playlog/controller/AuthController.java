@@ -3,8 +3,8 @@ package com.buren.playlog.controller;
 import com.buren.playlog.dto.LoginRequestDTO;
 import com.buren.playlog.dto.TokenResponseDTO;
 import com.buren.playlog.dto.UserRequestDTO;
-import com.buren.playlog.dto.LogoutRequestDTO;
 import com.buren.playlog.dto.UserResponseDTO;
+import com.buren.playlog.model.User;
 import com.buren.playlog.service.AuthService;
 import com.buren.playlog.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,10 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -66,8 +66,13 @@ public class AuthController {
     @Operation(summary = "User logs out")
     @ApiResponses(value = {@ApiResponse(responseCode = "204",description = "Successfully logged out.")})
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequestDTO dto){
-        authService.logout(dto.token());
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal User currentUser){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        String token = (String) auth.getCredentials();
+        authService.logout(token,currentUser);
         return ResponseEntity.noContent().build();
     }
 }

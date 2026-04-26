@@ -245,11 +245,9 @@ class PlaylogApplicationTests {
 	@Test
 	void logoutUserTest() throws Exception {
 		String token = registerLogin();
-		LogoutRequestDTO logoutRequestDTO = new LogoutRequestDTO(token);
 		mockMvc.perform(post(root+"/auth/logout")
 				.header("Authorization","Bearer "+token)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(logoutRequestDTO)))
+				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent())
 				.andReturn();
 

@@ -40,12 +40,14 @@ public class AuthService {
         throw new PasswordException("Password is incorrect");
     }
 
-    public void logout(String token) {
-        String username = jwtService.extractUserName(token);
-        BlacklistToken blacklist = new BlacklistToken();
-        blacklist.setToken(token);
-        blacklist.setActive(false);
-        blacklistTokenRepository.save(blacklist);
-        logger.info("User {} logged out successfully", username);
+    public void logout(String token,User currentUser) {
+        String username = currentUser.getUsername();
+        if(blacklistTokenRepository.findByToken(token).isEmpty()) {
+            BlacklistToken blacklist = new BlacklistToken(token);
+            blacklist.setToken(token);
+            blacklist.setActive(false);
+            blacklistTokenRepository.save(blacklist);
+            logger.info("User {} logged out successfully", username);
+        }
     }
 }
