@@ -17,6 +17,7 @@ public record ErrorResponseDTO(
         RAWG,
         ENTITY_NOT_FOUND,
         TOKEN_INVALID,
-        BAD_REQUEST
+        BAD_REQUEST,
+        INTERNAL_SERVER_ERROR
     }
 }

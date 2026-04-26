@@ -49,6 +49,23 @@ public class GameService extends AbstractService<Game, Long>{
         return response != null ? response.results() : List.of();
     }
 
+    public List<RawgGameResponse.GamePopularDTO> search(String query) {
+        RawgGameResponse response = rawgClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("games")
+                        .queryParam("key", rawgApiKey)
+                        .queryParam("search", query)
+                        .queryParam("page", 1)
+                        .build())
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                    throw new RawgException("RAWG API Error " + res.getStatusCode());
+                })
+                .body(RawgGameResponse.class);
+
+        return response != null ? response.results() : List.of();
+    }
+
     public GameResponseDTO getGame(Long id) {
         try {
             return dtoFrom(gameRepository.findByRawgId(id)

@@ -3,6 +3,7 @@ package com.buren.playlog.service;
 import com.buren.playlog.dto.UserRequestDTO;
 import com.buren.playlog.dto.UserResponseDTO;
 import com.buren.playlog.model.User;
+import com.buren.playlog.repository.ReviewRepository;
 import com.buren.playlog.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,11 +14,13 @@ public class UserService extends AbstractService<User, Long> {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, ReviewRepository reviewRepository, PasswordEncoder passwordEncoder) {
         super(userRepository);
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.reviewRepository = reviewRepository;
     }
 
     public UserResponseDTO getUser(Long id) {
@@ -34,6 +37,14 @@ public class UserService extends AbstractService<User, Long> {
         user.setPassword(passwordEncoder.encode(dto.password()));
 
         return dtoFrom(abstractRepository.save(user));
+    }
+
+    @Override
+    public void delete(Long id) {
+        User user = super.get(id);
+        user.setActive(false);
+        reviewRepository.deleteAllByUserId(id);
+        abstractRepository.save(user);
     }
 
     private static UserResponseDTO dtoFrom(User user) {
