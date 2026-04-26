@@ -40,8 +40,19 @@ public class ReviewController extends AbstractController<Review, Long>{
     })
     @GetMapping
     public ResponseEntity<Page<ReviewResponseDTO>> getAll(@PositiveOrZero @RequestParam(name = "page", defaultValue = "0") int page,
-                                                          @Positive @RequestParam(name = "size", defaultValue = "10") int size){
+                                                          @Positive @RequestParam(name = "size", defaultValue = "10") int size,
+                                                          @RequestParam(name = "gameId", required = false) Long gameId){
+        if (gameId != null) {
+            return ResponseEntity.ok(reviewService.getAllByGameId(gameId, page, size));
+        }
         return ResponseEntity.ok(reviewService.getAll(page, size));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Page<ReviewResponseDTO>> getMine(@PositiveOrZero @RequestParam(name = "page", defaultValue = "0") int page,
+                                                            @Positive @RequestParam(name = "size", defaultValue = "10") int size,
+                                                            @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(reviewService.getAllByUserId(currentUser.getId(), page, size));
     }
 
     @Operation(summary = "Adds review to game")

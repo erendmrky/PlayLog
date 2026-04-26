@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -49,6 +50,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> handleSecurityException(SecurityException ex){
         logger.error("Security error: {}", ex.getMessage(), ex);
         return new ResponseEntity<>(new ErrorResponseDTO(new ErrorResponseDTO.ErrorCode(ErrorResponseDTO.ErrorCodeEnum.BAD_REQUEST, ex.getMessage())
+                ,LocalDate.now()),HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDTO> handleValidationException(MethodArgumentNotValidException ex){
+        logger.error("Validation error: {}", ex.getMessage(), ex);
+        String message = ex.getFieldError() != null ? ex.getFieldError().getDefaultMessage() : "Validation error";
+        return new ResponseEntity<>(new ErrorResponseDTO(new ErrorResponseDTO.ErrorCode(ErrorResponseDTO.ErrorCodeEnum.BAD_REQUEST, message)
                 ,LocalDate.now()),HttpStatus.BAD_REQUEST);
     }
 

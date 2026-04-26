@@ -45,9 +45,28 @@ public class ReviewService extends AbstractService<Review, Long>{
     }
 
     public Page<ReviewResponseDTO> getAll(int page, int size){
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Pageable pageable = defaultPageable(page, size);
         return reviewRepository.findAllActive(pageable)
                 .map(ReviewService::dtoFrom);
+    }
+
+    public Page<ReviewResponseDTO> getAllByUserId(Long userId, int page, int size) {
+        Pageable pageable = defaultPageable(page, size);
+        return reviewRepository.findAllActiveByUserId(userId, pageable)
+                .map(ReviewService::dtoFrom);
+    }
+
+    public Page<ReviewResponseDTO> getAllByGameId(Long gameId, int page, int size) {
+        Pageable pageable = defaultPageable(page, size);
+        return reviewRepository.findAllActiveByGameId(gameId, pageable)
+                .map(ReviewService::dtoFrom);
+    }
+
+    private Pageable defaultPageable(int page, int size) {
+        return PageRequest.of(page, size, Sort.by(
+                Sort.Order.desc("createdDate"),
+                Sort.Order.desc("id")
+        ));
     }
 
     @Transactional
@@ -121,8 +140,9 @@ public class ReviewService extends AbstractService<Review, Long>{
             }
             logger.info("Deleting review with id {} for game with id {} by user {}", id, review.getGame().getRawgId(), currentUser.getUsername());
             super.delete(id);
+        } else {
+            throw new SecurityException("You must be logged in to delete a review.");
         }
-        throw new SecurityException("You must be logged in to delete a review.");
     }
 
     public ReviewResponseDTO getReview(Long id){
