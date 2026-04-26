@@ -3,7 +3,9 @@ package com.buren.playlog.service;
 import com.buren.playlog.dto.LoginRequestDTO;
 import com.buren.playlog.dto.TokenResponseDTO;
 import com.buren.playlog.exceptions.PasswordException;
+import com.buren.playlog.model.BlacklistToken;
 import com.buren.playlog.model.User;
+import com.buren.playlog.repository.BlacklistTokenRepository;
 import com.buren.playlog.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -17,13 +19,15 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final BlacklistTokenRepository blacklistTokenRepository;
 
     private final Logger logger = LoggerFactory.getLogger("AUTHENTICATION_SERVICE");
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,BlacklistTokenRepository blacklistTokenRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.blacklistTokenRepository = blacklistTokenRepository;
     }
 
     public TokenResponseDTO login(LoginRequestDTO loginDTO) {
@@ -36,4 +40,17 @@ public class AuthService {
         throw new PasswordException("Password is incorrect");
     }
 
+    public void logout(String token,User currentUser) {
+        String username = currentUser.getUsername();
+        if(blacklistTokenRepository.findByToken(token).isEmpty()) {
+            BlacklistToken blacklist = new BlacklistToken(token);
+            blacklist.setToken(token);
+            blacklist.setActive(false);
+            blacklistTokenRepository.save(blacklist);
+            logger.info("User {} logged out successfully", username);
+        }
+        else {
+            logger.warn("Logout attempt with an already blacklisted token for user: {}", username);
+        }
+    }
 }
