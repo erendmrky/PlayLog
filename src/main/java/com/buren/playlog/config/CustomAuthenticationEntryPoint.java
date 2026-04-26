@@ -34,8 +34,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             response.getWriter().write(jsonResponse);
         } else {
             response.setContentType("application/json;charset=UTF-8");
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            ErrorResponseDTO error = new ErrorResponseDTO(new ErrorResponseDTO.ErrorCode(ErrorResponseDTO.ErrorCodeEnum.INTERNAL_SERVER_ERROR, "Unknown error")
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            ErrorResponseDTO error = new ErrorResponseDTO(new ErrorResponseDTO.ErrorCode(ErrorResponseDTO.ErrorCodeEnum.BAD_REQUEST, "Unknown error")
                     , LocalDate.now());
 
             String jsonResponse = objectMapper.writeValueAsString(error);
